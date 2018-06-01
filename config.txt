@@ -1,0 +1,35 @@
+% DEFAULT_PATH is the initial path that the "Browse" button will point to.
+% It should be a relative (to this file) or absolute path, or "userpath" in 
+% which case the path will be set to the MATLAB-configured userpath.
+DEFAULT_PATH        =   userpath
+
+% DEFAULT_ALPHA is the initial transparency to use for isodose display, as
+% a fraction
+DEFAULT_ALPHA       =   0.4
+
+% PARAM_PATH defines the folder containing the parameters. Can also be set
+% to 'uigetdir', in which the user will be prompted when the application 
+% loads.
+PARAM_PATH          =   ./parameters
+
+% The following inputs define the default value of the risk model and 
+% parameters. Refer to the documentation for information on options. 
+DEFAULT_MODEL       =   UNSCEAR fractionated LQ competition model
+DEFAULT_PARAM       =   Default Parameters
+
+% The following inputs define the age model defaults. INCLUDE_AGE is a 
+% boolean, while the two ages are in years.
+INCLUDE_AGE         =   0
+DEFAULT_AGE_E       =   30
+DEFAULT_AGE_A       =   70
+
+% The following inputs define the outside CT model defaults. 
+% INCLUDE_LEAKAGE is a boolean. While DEFAULT_LEAKAGE is a fraction of the 
+% primary beam dose at isocenter (unitless).
+INCLUDE_LEAKAGE     =   0
+DEFAULT_LEAKAGE     =   0.001
+
+% DEFAULT_FRACTIONS sets the number of fractions to divide the dose by when 
+% plotting the site risks, in the absence of a loaded plan. Once a plan is 
+% loaded, the planned fractions will override this value.
+DEFAULT_FRACTIONS   =   1
