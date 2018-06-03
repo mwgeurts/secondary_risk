@@ -32,4 +32,4 @@ DEFAULT_LEAKAGE     =   0.001
 % DEFAULT_FRACTIONS sets the number of fractions to divide the dose by when 
 % plotting the site risks, in the absence of a loaded plan. Once a plan is 
 % loaded, the planned fractions will override this value.
-DEFAULT_FRACTIONS   =   1
+DEFAULT_FRACTIONS   =   10

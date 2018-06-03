@@ -13,10 +13,11 @@ function risk = ApplyRiskModel(varargin)
 %       information on the format expected.
 %   varargin{4}: a dose structure. See LoadDICOMDose for information on the
 %       format expected.
-%   varargin{5}: a vector of patient age at exposure and risk evaluation, 
-%       or empty if age is ignores
-%   varargin{6}: a boolean indicating whether or not to consider structures
-%       that exist outside of the patient CT.
+%   varargin{5}: an optional number of fractions used to consider 
+%   varargin{6}: a vector of patient age at exposure and risk evaluation, 
+%       or empty if age is ignored
+%   varargin{7}: a vector of leakage parameters (leakage fraction, MU), or 
+%       empty of structures outside of the CT are to be ignored
 %
 % Author: Mark Geurts, mark.w.geurts@gmail.com
 % Copyright (C) 2018 University of Wisconsin Board of Regents
@@ -72,7 +73,7 @@ switch varargin{1}
             end
             
             % Append age parameters, if needed
-            if nargin > 4 && ~isempty(varargin{5})
+            if nargin > 5 && ~isempty(varargin{6})
                 risk.GammaE = params.GammaE;
                 risk.GammaA = params.GammaA;
             end
@@ -85,26 +86,61 @@ switch varargin{1}
             risk = varargin{2};
         end
         
+        % Append empty risk plot column
+        risk.Plot = cell(size(params,1),1);
+        
+        % If fractions were provided
+        if nargin > 4 && ~isempty(varargin{5})
+            n = varargin{5};
+        else
+            n = 1;
+        end
+        
         % Calculate risk for each matched site with include flag
         for i = 1:size(risk,1)
             
+            % Compute risk plot using provided parameters
+            d = 0:0.1:100;
+            risk.Plot{i} = [d; (risk.Alpha1(i) * d + ...
+                risk.Beta1(i) * d.^2 / n) .* ...
+                exp(-risk.Alpha2(i) * d - risk.Beta2(i) * d.^2 / n)];
+            
             % If include is unchecked, do not compute and skip ahead
             if ~risk{i,3}
-                risk{i,end} = '';
-                continue;
-            end
+                risk.Risk{i} = '';
             
             % If site matches to a DICOM structure, compute DVH risk
-            if ~isempty(risk{i,2})
+            elseif ~isempty(risk{i,2}) && nargin > 2 && ...
+                    ~isempty(varargin{3}) && ~isempty(varargin{4})
                 
                 
-            % Otherwise, if the CT boolean is set, compute leakage risk
-            elseif nargin > 5 && varargin{6}
+            % Otherwise, if parameters are provided, compute leakage risk
+            elseif nargin > 6 && ~isempty(varargin{7})
                 
             
+            % Otherwise, do not compute risk
             else
-                risk{i,end} = '';
+                risk.Risk{i} = '';
             end
         end
 end
+
+% If age paraemeters were provided
+if nargin > 5 && ~isempty(varargin{6})
     
+    % Apply age risk for each site
+    for i = 1:size(risk,1)
+        
+        % Compute risk
+        mu = exp(risk.GammaE(i) * (varargin{6}(1) - 30) / 10 + ...
+            risk.GammaA(i) * log(varargin{6}(2)/70));
+        
+        % Scale risk plot
+        risk.Plot{i}(:,2) = risk.Plot{i}(:,2) * mu;
+        
+        % If structure risk was computed
+        if ~isempty(risk.Risk{i})
+            risk.Risk{i} = risk.Risk{i} * mu;
+        end
+    end
+end

@@ -45,8 +45,14 @@ if ~handles.config.INCLUDE_AGE
     set(handles.agea_text, 'Enable', 'off');
     set(handles.agea_input, 'Enable', 'off');
 end
+if get(handles.age_check, 'Value') == 1
+    age_params = [str2double(get(handles.agee_input, 'String')) ...
+        str2double(get(handles.agea_input, 'String'))];
+else
+    age_params = [];
+end
 
-% Reset outside CT inputs
+% Reset leakage inputs
 set(handles.leakage_check, 'Value', handles.config.INCLUDE_LEAKAGE);
 set(handles.leakage_input, 'String', sprintf('%0.2f%%', ...
     handles.config.DEFAULT_LEAKAGE * 100));
@@ -70,8 +76,6 @@ set(handles.alpha, 'visible', 'off');
 % Hide plots
 set(allchild(handles.tcs_axes), 'visible', 'off'); 
 set(handles.tcs_axes, 'visible', 'off');
-set(allchild(handles.dvh_axes), 'visible', 'off'); 
-set(handles.dvh_axes, 'visible', 'off');
 set(allchild(handles.risk_axes), 'visible', 'off'); 
 set(handles.risk_axes, 'visible', 'off');
 
@@ -88,13 +92,24 @@ set(handles.model_menu, 'Value', ...
     find(strcmp(handles.config.DEFAULT_MODEL, ...
     get(handles.model_menu, 'String')), 1));
 
+% Set fractions
+set(handles.dvh_fx, 'String', sprintf('%i', ...
+    handles.config.DEFAULT_FRACTIONS));
+
 % Initialize parameters table
 risk = ApplyRiskModel(get(handles.model_menu, 'Value'), ...
-    handles.parameters{get(handles.param_menu, 'Value'), 2});
+    handles.parameters{get(handles.param_menu, 'Value'), 2}, [], [], ...
+    str2double(get(handles.dvh_fx, 'String')), age_params, []);
+
+% Update DVH dropdown and plot
+set(handles.dvh_menu, 'String', risk.Site);
+set(handles.dvh_menu, 'Value', 1);
+handles.dvh_axes = PlotDVH(handles.dvh_axes, 1, [], [], risk.Plot);
+
+% Set parameters table (minus the Plot data)
+risk.Plot = [];
 set(handles.model_table, 'ColumnName', risk.Properties.VariableNames);
 set(handles.model_table, 'Data', table2cell(risk));
 
-% Update DVH plot
-set(handles.dvh_fx, 'String', sprintf('%i', ...
-    handles.config.DEFAULT_FRACTIONS));
-handles = PlotDVH(handles);
+% Clear temporary variables
+clear risk;
