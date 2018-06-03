@@ -43,3 +43,15 @@ if exist('LoadDICOMDose', 'file') ~= 2
         'git clone --recursive or git submodule init followed by git ', ...
         'submodule update to fetch all submodules'], 'ERROR');
 end
+
+% Add dicom_tools submodule to search path
+addpath('./tcs_plots');
+
+% Check if MATLAB can find ImageViewer
+if exist('ImageViewer', 'file') ~= 2
+    
+    % If not, throw an error
+    Event(['The tcs_plots submodule does not exist in the search path. Use ', ...
+        'git clone --recursive or git submodule init followed by git ', ...
+        'submodule update to fetch all submodules'], 'ERROR');
+end
