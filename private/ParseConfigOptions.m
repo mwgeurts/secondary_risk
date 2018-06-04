@@ -80,3 +80,8 @@ Event(sprintf('Default leakage set to %0.2f%%', ...
 % Parse default fractions
 config.DEFAULT_FRACTIONS = str2double(config.DEFAULT_FRACTIONS);
 Event(sprintf('Default fractions set to %i', config.DEFAULT_FRACTIONS));
+
+% Parse match threshold
+config.MATCH_THRESHOLD = str2double(config.MATCH_THRESHOLD);
+Event(sprintf('Levenshtein match threshold set to %0.1f', ...
+    config.MATCH_THRESHOLD));

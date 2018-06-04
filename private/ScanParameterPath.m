@@ -36,7 +36,7 @@ for i = 1:length(files)
         try
             readtable(fullfile(path, files(i).name));
             [~, name, ~] = fileparts(files(i).name);
-            params{size(params,1)+1,1} = name;
+            params{size(params,1)+1,1} = strrep(name, '_', ' ');
             params{size(params,1),2} = fullfile(path, files(i).name);
             Event(['Parameter file "', files(i).name, '" loaded']);
         catch

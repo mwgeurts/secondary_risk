@@ -37,7 +37,7 @@ if nargin > 2
     
     % Recompute the DVH
     if ~isempty(structures) &&  ~isempty(dose)
-        error('TODO');
+        % error('TODO');
     else
         dvh = [];
     end

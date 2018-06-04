@@ -33,3 +33,7 @@ DEFAULT_LEAKAGE     =   0.001
 % plotting the site risks, in the absence of a loaded plan. Once a plan is 
 % loaded, the planned fractions will override this value.
 DEFAULT_FRACTIONS   =   10
+
+% MATCH_THRESHOLD sets the Levenshtein distance threshold (expressed as a 
+% fraction of the string length) above which the closest match is rejected
+MATCH_THRESHOLD     =   0.4

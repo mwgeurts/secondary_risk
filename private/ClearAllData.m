@@ -21,10 +21,10 @@ function handles = ClearAllData(handles)
 % with this program. If not, see http://www.gnu.org/licenses/.
 
 % Log action
-if isfield(handles, 'reference')
-    Event('Clearing data from memory');
+if isfield(handles, 'plan')
+    Event('Clearing data from memory and resetting parameters');
 else
-    Event('Initializing data variables');
+    Event('Initializing parameters');
 end
 
 % Clear DICOM data
@@ -59,6 +59,8 @@ set(handles.leakage_input, 'String', sprintf('%0.2f%%', ...
 if ~handles.config.INCLUDE_LEAKAGE
     set(handles.leakage_text, 'Enable', 'off');
     set(handles.leakage_input, 'Enable', 'off');
+    set(handles.mu_text, 'Enable', 'Off');
+    set(handles.mu_input, 'Enable', 'Off');
 end
 
 % Reset and hide TCS options
@@ -68,16 +70,25 @@ set(handles.tcs_c, 'visible', 'off');
 set(handles.tcs_c, 'Value', 0);
 set(handles.tcs_s, 'visible', 'off');
 set(handles.tcs_s, 'Value', 0);
-set(handles.tcs_slider, 'visible', 'off');
+if isfield(handles, 'tcsplot')
+    delete(handles.tcsplot);
+else
+    set(handles.tcs_slider, 'visible', 'off');
+    set(allchild(handles.tcs_axes), 'visible', 'off'); 
+    set(handles.tcs_axes, 'visible', 'off');
+    colorbar(handles.tcs_axes,'off');
+end
+
 set(handles.alpha, 'String', ...
     sprintf('%0.1f%%', handles.config.DEFAULT_ALPHA * 100));
 set(handles.alpha, 'visible', 'off');
 
-% Hide plots
-set(allchild(handles.tcs_axes), 'visible', 'off'); 
-set(handles.tcs_axes, 'visible', 'off');
+% Hide risk plot
 set(allchild(handles.risk_axes), 'visible', 'off'); 
 set(handles.risk_axes, 'visible', 'off');
+
+% Disable simulation
+set(handles.sim_button, 'enable', 'off');
 
 % Set parameters menu
 handles.parameters = ScanParameterPath(handles.config.PARAM_PATH);
@@ -101,6 +112,11 @@ risk = ApplyRiskModel(get(handles.model_menu, 'Value'), ...
     handles.parameters{get(handles.param_menu, 'Value'), 2}, [], [], ...
     str2double(get(handles.dvh_fx, 'String')), age_params, []);
 
+% If Gamma params are missing, disable age model
+if ~isfield(risk, 'GammaE') || ~isfield(risk, 'GammaA')
+    set(handles.age_check, 'Value', 0);
+end
+    
 % Update DVH dropdown and plot
 set(handles.dvh_menu, 'String', risk.Site);
 set(handles.dvh_menu, 'Value', 1);
@@ -109,6 +125,8 @@ handles.dvh_axes = PlotDVH(handles.dvh_axes, 1, [], [], risk.Plot);
 % Set parameters table (minus the Plot data)
 risk.Plot = [];
 set(handles.model_table, 'ColumnName', risk.Properties.VariableNames);
+set(handles.model_table, 'ColumnEditable', ...
+    [false true(1, size(risk,2)-2) false]);
 set(handles.model_table, 'Data', table2cell(risk));
 
 % Clear temporary variables

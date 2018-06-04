@@ -22,7 +22,7 @@ function varargout = SecondaryRiskCalculator(varargin)
 
 % Edit the above text to modify the response to help SecondaryRiskCalculator
 
-% Last Modified by GUIDE v2.5 01-Jun-2018 17:34:28
+% Last Modified by GUIDE v2.5 04-Jun-2018 16:02:24
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -132,7 +132,7 @@ function varargout = SecondaryRiskCalculator_OutputFcn(~, ~, handles)
 varargout{1} = handles.output;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function clear_button_Callback(hObject, ~, handles)
+function clear_button_Callback(hObject, ~, handles) %#ok<*DEFNU>
 % hObject    handle to clear_button (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
@@ -144,322 +144,522 @@ handles = ClearAllData(handles);
 guidata(hObject, handles);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function tcs_t_Callback(hObject, eventdata, handles)
+function tcs_t_Callback(hObject, ~, handles)
 % hObject    handle to tcs_t (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-% Hint: get(hObject,'Value') returns toggle state of tcs_t
+% If orientation was selected
+if get(hObject, 'Value') == 1
+    
+    % Clear other two
+    set(handles.tcs_c, 'Value', 0);
+    set(handles.tcs_s, 'Value', 0);
+    
+    % Update viewer with transparency value
+    handles.tcs.Initialize('tcsview', 'T');
+else
+    set(hObject, 'Value', 1);
+end
 
+% Update handles structure
+guidata(hObject, handles);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function tcs_c_Callback(hObject, eventdata, handles)
+function tcs_c_Callback(hObject, ~, handles)
 % hObject    handle to tcs_c (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-% Hint: get(hObject,'Value') returns toggle state of tcs_c
+% If orientation was selected
+if get(hObject, 'Value') == 1
+    
+    % Clear other two
+    set(handles.tcs_t, 'Value', 0);
+    set(handles.tcs_s, 'Value', 0);
+    
+    % Update viewer with transparency value
+    handles.tcs.Initialize('tcsview', 'C');
+else
+    set(hObject, 'Value', 1);
+end
 
+% Update handles structure
+guidata(hObject, handles);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function tcs_s_Callback(hObject, eventdata, handles)
+function tcs_s_Callback(hObject, ~, handles)
 % hObject    handle to tcs_s (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-% Hint: get(hObject,'Value') returns toggle state of tcs_s
+% If orientation was selected
+if get(hObject, 'Value') == 1
+    
+    % Clear other two
+    set(handles.tcs_c, 'Value', 0);
+    set(handles.tcs_t, 'Value', 0);
+    
+    % Update viewer with transparency value
+    handles.tcs.Initialize('tcsview', 'S');
+else
+    set(hObject, 'Value', 1);
+end
 
+% Update handles structure
+guidata(hObject, handles);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function alpha_Callback(hObject, eventdata, handles)
+function alpha_Callback(hObject, ~, handles)
 % hObject    handle to alpha (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-% Hints: get(hObject,'String') returns contents of alpha as text
-%        str2double(get(hObject,'String')) returns contents of alpha as a double
+% Parse and bound the value
+value = max(0, min(100, ...
+    str2double(strrep(get(hObject, 'String'), '%', ''))));
 
+% Reformat
+set(hObject, 'String', sprintf('%0.1f%%', value));
+
+% Update viewer with transparency value
+handles.tcs.Update('alpha', value/100);
+
+% Clear temporary variable
+clear value;
+
+% Update handles structure
+guidata(hObject, handles);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function alpha_CreateFcn(hObject, eventdata, handles)
+function alpha_CreateFcn(hObject, ~, ~)
 % hObject    handle to alpha (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
 
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+% Edit controls usually have a white background on Windows.
+if ispc && isequal(get(hObject,'BackgroundColor'), ...
+        get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
 
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function tcs_slider_Callback(hObject, eventdata, handles)
+function tcs_slider_Callback(hObject, ~, handles)
 % hObject    handle to tcs_slider (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-% Hints: get(hObject,'Value') returns position of slider
-%        get(hObject,'Min') and get(hObject,'Max') to determine range of slider
+% Update viewer with current slice
+handles.tcs.Update('slice', round(get(hObject, 'Value')));
 
+% Update handles structure
+guidata(hObject, handles);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function tcs_slider_CreateFcn(hObject, eventdata, handles)
+function tcs_slider_CreateFcn(hObject, ~, ~)
 % hObject    handle to tcs_slider (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
 
-% Hint: slider controls usually have a light gray background.
-if isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+% Slider controls usually have a light gray background.
+if isequal(get(hObject,'BackgroundColor'), ...
+        get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor',[.9 .9 .9]);
 end
 
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function path_text_Callback(hObject, eventdata, handles)
+function path_text_Callback(~, ~, ~)
 % hObject    handle to path_text (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-% Hints: get(hObject,'String') returns contents of path_text as text
-%        str2double(get(hObject,'String')) returns contents of path_text as a double
-
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function path_text_CreateFcn(hObject, eventdata, handles)
+function path_text_CreateFcn(hObject, ~, ~)
 % hObject    handle to path_text (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
 
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+% Edit controls usually have a white background on Windows.
+if ispc && isequal(get(hObject,'BackgroundColor'), ...
+        get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
 
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function path_browse_Callback(hObject, eventdata, handles)
+function path_browse_Callback(hObject, ~, handles)
 % hObject    handle to path_browse (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
+% Execute BrowsePatient
+handles = BrowsePatient(handles);
+
+% Update handles structure
+guidata(hObject, handles);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function model_menu_Callback(hObject, eventdata, handles)
+function model_menu_Callback(hObject, ~, handles)
 % hObject    handle to model_menu (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-% Hints: contents = cellstr(get(hObject,'String')) returns model_menu contents as cell array
-%        contents{get(hObject,'Value')} returns selected item from model_menu
+% Log change
+models = cellstr(get(hObject,'String'));
+Event(['Model changed to ', models{get(hObject,'Value')}]);
 
+% Recalculate the risk model
+handles = UpdateRiskModel(handles);
+
+% Update handles structure
+guidata(hObject, handles);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function model_menu_CreateFcn(hObject, eventdata, handles)
+function model_menu_CreateFcn(hObject, ~, ~)
 % hObject    handle to model_menu (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
 
-% Hint: popupmenu controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+% Ppopupmenu controls usually have a white background on Windows.
+if ispc && isequal(get(hObject,'BackgroundColor'), ...
+        get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
 
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function param_menu_Callback(hObject, eventdata, handles)
+function param_menu_Callback(hObject, ~, handles)
 % hObject    handle to param_menu (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-% Hints: contents = cellstr(get(hObject,'String')) returns param_menu contents as cell array
-%        contents{get(hObject,'Value')} returns selected item from param_menu
+% Log change
+params = cellstr(get(hObject,'String'));
+Event(['Parameter set changed to ', params{get(hObject,'Value')}]);
 
+% Recalculate the risk model
+handles = UpdateRiskModel(handles, ...
+    handles.parameters{get(hObject,'Value'),2});
+
+% Update handles structure
+guidata(hObject, handles);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function param_menu_CreateFcn(hObject, eventdata, handles)
+function param_menu_CreateFcn(hObject, ~, ~)
 % hObject    handle to param_menu (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
 
-% Hint: popupmenu controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+% Popupmenu controls usually have a white background on Windows.
+if ispc && isequal(get(hObject,'BackgroundColor'), ...
+        get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
 
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function leakage_menu_Callback(hObject, eventdata, handles)
-% hObject    handle to leakage_menu (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: contents = cellstr(get(hObject,'String')) returns leakage_menu contents as cell array
-%        contents{get(hObject,'Value')} returns selected item from leakage_menu
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function leakage_menu_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to leakage_menu (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: popupmenu controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
-
-
-% --- Executes on selection change in dvh_menu.
-function dvh_menu_Callback(hObject, eventdata, handles)
+function dvh_menu_Callback(hObject, ~, handles)
 % hObject    handle to dvh_menu (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-% Hints: contents = cellstr(get(hObject,'String')) returns dvh_menu contents as cell array
-%        contents{get(hObject,'Value')} returns selected item from dvh_menu
+% Log choice
+contents = cellstr(get(hObject,'String'));
+Event(['DVH/risk plot changed to site ', contents{get(hObject,'Value')}]);
 
+% Update plot
+handles.dvh_axes = PlotDVH(handles.dvh_axes, get(hObject,'Value'));
 
-% --- Executes during object creation, after setting all properties.
-function dvh_menu_CreateFcn(hObject, eventdata, handles)
+% Update handles structure
+guidata(hObject, handles);
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function dvh_menu_CreateFcn(hObject, ~, ~)
 % hObject    handle to dvh_menu (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
 
-% Hint: popupmenu controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+% Popupmenu controls usually have a white background on Windows.
+if ispc && isequal(get(hObject,'BackgroundColor'), ...
+        get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
 
-
-% --- Executes on button press in age_check.
-function age_check_Callback(hObject, eventdata, handles)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function age_check_Callback(hObject, ~, handles)
 % hObject    handle to age_check (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-% Hint: get(hObject,'Value') returns toggle state of age_check
+% If checkbox was enabled
+if get(hObject, 'Value')
+    
+    % Make sure parameter set contains the necessary model parameters
+    if ~contains('GammaE', get(handles.model_table, 'ColumnName')) || ...
+            ~contains('GammaA', get(handles.model_table, 'ColumnName'))
+        
+        % If not, uncheck box and do nothing
+        Event(['Age model could not be applied as one or more Gamma ', ...
+            'parameters are missing from the selected set. Choose a ', ...
+            'different parameter set'], 'WARN');
+        set(hObject, 'Value', 0);
+        return;
+    end
+    
+    % Log action
+    Event(['Exposed age model enabled with parameters [', ...
+        get(handles.agee_input, 'String'), ', ', ...
+        get(handles.agea_input, 'String'), '] years']);
+    
+    % Enable inputs
+    set(handles.agee_text, 'Enable', 'On');
+    set(handles.agee_input, 'Enable', 'On');
+    set(handles.agea_text, 'Enable', 'On');
+    set(handles.agea_input, 'Enable', 'On');
 
+% OTherwise, checkbox was disabled
+else
+    
+    % Log action
+    Event('Exposed age model disabled');
+    
+    % Disable inputs
+    set(handles.agee_text, 'Enable', 'Off');
+    set(handles.agee_input, 'Enable', 'Off');
+    set(handles.agea_text, 'Enable', 'Off');
+    set(handles.agea_input, 'Enable', 'Off');
+end
 
-% --- Executes on button press in age_n.
-function age_n_Callback(hObject, eventdata, handles)
-% hObject    handle to age_n (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
+% Recalculate the risk model
+handles = UpdateRiskModel(handles);
 
-% Hint: get(hObject,'Value') returns toggle state of age_n
+% Update handles structure
+guidata(hObject, handles);
 
-
-% --- Executes on button press in leakage_check.
-function leakage_check_Callback(hObject, eventdata, handles)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function leakage_check_Callback(hObject, ~, handles)
 % hObject    handle to leakage_check (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-% Hint: get(hObject,'Value') returns toggle state of leakage_check
+% If checkbox was enabled
+if get(hObject, 'Value')
+    
+    % Log action
+    Event(['Leakage model enabled with parameters [', ...
+        get(handles.leakage_input, 'String'), ']']);
+    
+    % Enable inputs
+    set(handles.leakage_text, 'Enable', 'On');
+    set(handles.leakage_input, 'Enable', 'On');
+    set(handles.mu_text, 'Enable', 'On');
+    set(handles.mu_input, 'Enable', 'On');
 
+% OTherwise, checkbox was disabled
+else
+    
+    % Log action
+    Event('Leakage model disabled');
+    
+    % Disable inputs
+    set(handles.leakage_text, 'Enable', 'Off');
+    set(handles.leakage_input, 'Enable', 'Off');
+    set(handles.mu_text, 'Enable', 'Off');
+    set(handles.mu_input, 'Enable', 'Off');
+end
 
-% --- Executes on button press in ct_n.
-function ct_n_Callback(hObject, eventdata, handles)
-% hObject    handle to ct_n (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
+% Recalculate the risk model only if plan data is loaded
+if ~isempty(handles.plan)
+    handles = UpdateRiskModel(handles);
+end
 
-% Hint: get(hObject,'Value') returns toggle state of ct_n
+% Update handles structure
+guidata(hObject, handles);
 
-
-
-function dvh_fx_Callback(hObject, eventdata, handles)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function dvh_fx_Callback(hObject, ~, handles)
 % hObject    handle to dvh_fx (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-% Hints: get(hObject,'String') returns contents of dvh_fx as text
-%        str2double(get(hObject,'String')) returns contents of dvh_fx as a double
+% Parse as number and log change
+set(hObject, 'String', floor(str2double(get(hObject, 'String'))));
+Event(['Number of fractions changed to ', get(hObject, 'String')]);
 
+% Recalculate the risk model
+handles = UpdateRiskModel(handles);
 
-% --- Executes during object creation, after setting all properties.
-function dvh_fx_CreateFcn(hObject, eventdata, handles)
+% Update handles structure
+guidata(hObject, handles);
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function dvh_fx_CreateFcn(hObject, ~, ~)
 % hObject    handle to dvh_fx (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
 
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+% Edit controls usually have a white background on Windows.
+if ispc && isequal(get(hObject,'BackgroundColor'), ...
+        get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
 
-
-
-function agea_input_Callback(hObject, eventdata, handles)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function agea_input_Callback(hObject, ~, handles)
 % hObject    handle to agea_input (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-% Hints: get(hObject,'String') returns contents of agea_input as text
-%        str2double(get(hObject,'String')) returns contents of agea_input as a double
+% Parse as number and log change
+set(hObject, 'String', str2double(get(hObject, 'String')));
+Event(['Attained age changed to ', get(hObject, 'String'), ' years']);
 
+% Recalculate the risk model
+handles = UpdateRiskModel(handles);
 
-% --- Executes during object creation, after setting all properties.
-function agea_input_CreateFcn(hObject, eventdata, handles)
+% Update handles structure
+guidata(hObject, handles);
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function agea_input_CreateFcn(hObject, ~, ~)
 % hObject    handle to agea_input (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
 
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+% Edit controls usually have a white background on Windows.
+if ispc && isequal(get(hObject,'BackgroundColor'), ...
+        get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
 
-
-
-function leakage_input_Callback(hObject, eventdata, handles)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function leakage_input_Callback(hObject, ~, handles)
 % hObject    handle to leakage_input (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-% Hints: get(hObject,'String') returns contents of leakage_input as text
-%        str2double(get(hObject,'String')) returns contents of leakage_input as a double
+% Parse as number and log change
+set(hObject, 'String', sprintf('%0.2f%%', str2double(strrep(get(hObject, ...
+    'String'), '%', ''))));
+Event(['Head leakage changed to ', get(hObject, 'String')]);
 
+% Recalculate the risk model
+handles = UpdateRiskModel(handles);
 
-% --- Executes during object creation, after setting all properties.
-function leakage_input_CreateFcn(hObject, eventdata, handles)
+% Update handles structure
+guidata(hObject, handles);
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function leakage_input_CreateFcn(hObject, ~, ~)
 % hObject    handle to leakage_input (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
 
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+% Edit controls usually have a white background on Windows.
+if ispc && isequal(get(hObject,'BackgroundColor'), ...
+        get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
 
-
-
-function agee_input_Callback(hObject, eventdata, handles)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function agee_input_Callback(hObject, ~, handles)
 % hObject    handle to agee_input (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-% Hints: get(hObject,'String') returns contents of agee_input as text
-%        str2double(get(hObject,'String')) returns contents of agee_input as a double
+% Parse as number and log change
+set(hObject, 'String', str2double(get(hObject, 'String')));
+Event(['Exposed age changed to ', get(hObject, 'String'), ' years']);
 
+% Recalculate the risk model
+handles = UpdateRiskModel(handles);
 
-% --- Executes during object creation, after setting all properties.
-function agee_input_CreateFcn(hObject, eventdata, handles)
+% Update handles structure
+guidata(hObject, handles);
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function agee_input_CreateFcn(hObject, ~, ~)
 % hObject    handle to agee_input (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
 
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+% Edit controls usually have a white background on Windows.
+if ispc && isequal(get(hObject,'BackgroundColor'), ...
+        get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function sim_button_Callback(hObject, ~, handles)
+% hObject    handle to sim_button (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function mu_input_Callback(hObject, ~, handles)
+% hObject    handle to mu_input (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Parse as number and log change
+set(hObject, 'String', str2double(get(hObject, 'String')));
+Event(['Monitor Units changed to ', get(hObject, 'String')]);
+
+% Recalculate the risk model
+handles = UpdateRiskModel(handles);
+
+% Update handles structure
+guidata(hObject, handles);
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function mu_input_CreateFcn(hObject, ~, ~)
+% hObject    handle to mu_input (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Edit controls usually have a white background on Windows.
+if ispc && isequal(get(hObject,'BackgroundColor'), ...
+        get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function model_table_CellEditCallback(hObject, eventdata, handles)
+% hObject    handle to model_table (see GCBO)
+% eventdata  structure with the following fields 
+%	Indices: row and column indices of the cell(s) edited
+%	PreviousData: previous data for the cell(s) edited
+%	EditData: string(s) entered by the user
+%	NewData: EditData or its converted form set on the Data property. Empty 
+%       if Data was not changed
+%	Error: error string when failed to convert EditData to appropriate 
+%       value for Data
+% handles    structure with handles and user data (see GUIDATA)
+
+% Log change
+data = get(hObject, 'Data');
+columns = get(hObject, 'ColumnName');
+if eventdata.Indices(2) == 2
+    Event([data{eventdata.Indices(1),1}, ' structure set to ', ...
+        regexprep(eventdata.EditData, '<[^>]*>', '')]);
+    data{eventdata.Indices(1),2} = ...
+        regexprep(eventdata.EditData, '<[^>]*>', '');
+    set(hObject, 'Data', data);
+elseif eventdata.Indices(2) == 3
+    if eventdata.EditData
+        Event([data{eventdata.Indices(1),1}, ' included in risk model']);
+    else
+        Event([data{eventdata.Indices(1),1}, ' excluded from risk model']);
+    end
+else
+    Event([data{eventdata.Indices(1),1}, ' model parameter ', ...
+        columns{eventdata.Indices(2),1},' set to ', eventdata.EditData]);
+end
+
+% Recalculate the risk model
+handles = UpdateRiskModel(handles);
+
+% Update handles structure
+guidata(hObject, handles);
+
+% Clear temporary variables
+clear data columns;

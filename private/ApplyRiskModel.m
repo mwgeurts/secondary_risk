@@ -72,8 +72,9 @@ switch varargin{1}
                error('TODO'); 
             end
             
-            % Append age parameters, if needed
-            if nargin > 5 && ~isempty(varargin{6})
+            % Append age parameters, if available
+            if ismember('GammaE', params.Properties.VariableNames) && ...
+                    ismember('GammaA', params.Properties.VariableNames)
                 risk.GammaE = params.GammaE;
                 risk.GammaA = params.GammaA;
             end
@@ -87,7 +88,7 @@ switch varargin{1}
         end
         
         % Append empty risk plot column
-        risk.Plot = cell(size(params,1),1);
+        risk.Plot = cell(size(risk,1),1);
         
         % If fractions were provided
         if nargin > 4 && ~isempty(varargin{5})
@@ -112,11 +113,11 @@ switch varargin{1}
             % If site matches to a DICOM structure, compute DVH risk
             elseif ~isempty(risk{i,2}) && nargin > 2 && ...
                     ~isempty(varargin{3}) && ~isempty(varargin{4})
-                
+                %error('TODO');
                 
             % Otherwise, if parameters are provided, compute leakage risk
             elseif nargin > 6 && ~isempty(varargin{7})
-                
+                %error('TODO');
             
             % Otherwise, do not compute risk
             else
@@ -136,7 +137,7 @@ if nargin > 5 && ~isempty(varargin{6})
             risk.GammaA(i) * log(varargin{6}(2)/70));
         
         % Scale risk plot
-        risk.Plot{i}(:,2) = risk.Plot{i}(:,2) * mu;
+        risk.Plot{i}(2,:) = risk.Plot{i}(2,:) * mu;
         
         % If structure risk was computed
         if ~isempty(risk.Risk{i})
