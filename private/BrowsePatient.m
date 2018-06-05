@@ -1,6 +1,8 @@
 function handles = BrowsePatient(handles)
 % BrowsePatient is called by SecondaryRiskCalculator when the browse button
-% is clicked.
+% is clicked. It opens a browser to allow the user to select a folder, then
+% scans the folder for DICOM files, loads them into the tool, and updates
+% the risk calculations.
 %
 % Author: Mark Geurts, mark.w.geurts@gmail.com
 % Copyright (C) 2018 University of Wisconsin Board of Regents
@@ -169,40 +171,7 @@ if path ~= 0
 
     % Enable transparency
     set(handles.alpha, 'visible', 'on');
-    
-    % Set structure list
-    structures = cell(1, length(handles.image.structures)+1);
-    structures{1} = ' ';
-    names = cell(1, length(handles.image.structures));
-    for i = 1:length(handles.image.structures)
-        names{i} = handles.image.structures{i}.name;
-        structures{i+1} = sprintf(...
-            '<html><font id="%s" color="rgb(%i,%i,%i)">%s</font></html>', ...
-            handles.image.structures{i}.name, ...
-            handles.image.structures{i}.color(1), ...
-            handles.image.structures{i}.color(2), ...
-            handles.image.structures{i}.color(3), ...
-            handles.image.structures{i}.name);
-    end
-    formats = get(handles.model_table, 'ColumnFormat');
-    formats{2} = structures;
-    set(handles.model_table, 'ColumnFormat', formats);
-    
-    % Attempt to match structures
-    params = get(handles.model_table, 'Data');
-    for i = 1:size(params, 1)
-        [c, d] = strnearest(params{i,1}, names, 'case');
-        if length(c) == 1 && ...
-                handles.config.MATCH_THRESHOLD > d / length(params{i,1})
-            Event(sprintf(['Site %s matched to structure %s with a ', ...
-                'distance %i'], params{i,1}, names{c}, d));
-            params{i,2} = names{c};
-        else
-            params{i,2} = ' ';
-        end
-    end
-    set(handles.model_table, 'Data', params);
-    
+
     % Update exposure age with patient's age
     if isfield(handles.plan, 'PatientAge') && ...
             ~isempty(handles.plan.PatientAge)
@@ -237,9 +206,10 @@ if path ~= 0
                 .(sprintf('Item_%i', j)).BeamMeterset;
         end
     end
-    plan.mu = mu;
+    mu = round(mu);
+    handles.plan.mu = mu;
     if mu > 0
-        set(handles.mu_input, 'String', sprintf('%i', mu_input));
+        set(handles.mu_input, 'String', sprintf('%0.0f', mu));
         Event(['Monitor Units set to ', get(handles.mu_input, ...
             'String'), ' based on DICOM header']);
     else
@@ -256,7 +226,7 @@ if path ~= 0
         end
     end
     if fx > 0
-        set(handles.dvh_fx, 'String', sprintf('%i', fx));
+        set(handles.dvh_fx, 'String', sprintf('%0.0f', fx));
         Event(['Number of fractions set to ', get(handles.dvh_fx, ...
             'String'), ' based on DICOM header']);
     else
@@ -264,6 +234,60 @@ if path ~= 0
         Event('Number of fractions could not be parsed from DICOM plan', ...
             'WARN');
     end
+    
+    % Correct gender, if available
+    genders = get(handles.gender_menu, 'String');
+    if isfield(handles.plan, 'PatientSex') && ...
+            startsWith(genders{3 - get(handles.gender_menu, 'Value')}, ...
+            handles.plan.PatientSex(1))
+            
+        % Update gender
+        set(handles.gender_menu, 'Value', 3 - ...
+            get(handles.gender_menu, 'Value'));
+        
+        % Force parameter refresh
+        params = ApplyRiskModel(get(handles.param_menu, 'Value'),...
+            handles.parameters{get(handles.param_menu, 'Value'),2}, ...
+            handles.plan.PatientSex);
+    
+    % Otherwise use existing parameters
+    else
+        params = get(handles.model_table, 'Data');
+    end
+    
+    % Set structure list
+    structures = cell(1, length(handles.image.structures)+1);
+    structures{1} = ' ';
+    names = cell(1, length(handles.image.structures));
+    for i = 1:length(handles.image.structures)
+        names{i} = handles.image.structures{i}.name;
+        structures{i+1} = sprintf(...
+            '<html><font id="%s" color="rgb(%i,%i,%i)">%s</font></html>', ...
+            handles.image.structures{i}.name, ...
+            handles.image.structures{i}.color(1), ...
+            handles.image.structures{i}.color(2), ...
+            handles.image.structures{i}.color(3), ...
+            handles.image.structures{i}.name);
+    end
+    formats = get(handles.model_table, 'ColumnFormat');
+    formats{2} = structures;
+    set(handles.model_table, 'ColumnFormat', formats);
+    
+    % Attempt to match structures
+    for i = 1:size(params, 1)
+        [c, d] = strnearest(params{i,1}, names, 'case');
+        if length(c) == 1 && ...
+                handles.config.MATCH_THRESHOLD > d / length(params{i,1})
+            Event(sprintf(['Site %s matched to structure %s with a ', ...
+                'distance %i'], params{i,1}, names{c}, d));
+            params{i,2} = names{c};
+        else
+            params{i,2} = ' ';
+        end
+    end
+    
+    % Update parameters table
+    set(handles.model_table, 'Data', params);
     
     % Recalculate the risk model
     handles = UpdateRiskModel(handles);

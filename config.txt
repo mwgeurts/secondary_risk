@@ -15,7 +15,7 @@ PARAM_PATH          =   ./parameters
 % The following inputs define the default value of the risk model and 
 % parameters. Refer to the documentation for information on options. 
 DEFAULT_MODEL       =   UNSCEAR fractionated LQ competition model
-DEFAULT_PARAM       =   Default Parameters
+DEFAULT_PARAM       =   Default Parameters (EAR)
 
 % The following inputs define the age model defaults. INCLUDE_AGE is a 
 % boolean, while the two ages are in years.
@@ -27,7 +27,7 @@ DEFAULT_AGE_A       =   70
 % INCLUDE_LEAKAGE is a boolean. While DEFAULT_LEAKAGE is a fraction of the 
 % primary beam dose at isocenter (unitless).
 INCLUDE_LEAKAGE     =   0
-DEFAULT_LEAKAGE     =   0.001
+DEFAULT_LEAKAGE     =   0.0001
 
 % DEFAULT_FRACTIONS sets the number of fractions to divide the dose by when 
 % plotting the site risks, in the absence of a loaded plan. Once a plan is 

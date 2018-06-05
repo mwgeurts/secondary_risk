@@ -30,19 +30,27 @@ end
 % Retrieve leakage parameters
 if get(handles.leakage_check, 'Value') == 1 && ...
         ~isempty(get(handles.mu_input, 'String'))
-    leakage_params = [str2double(get(handles.leakage_input, 'String')) ...
+    leakage_params = [str2double(strrep(get(handles.leakage_input, ...
+        'String'), '%', ''))/100
         str2double(get(handles.mu_input, 'String'))];
 else
     leakage_params = [];
 end
 
 % Create parameters table
-if nargin == 2 && ~isempty(varargin{1})
+if nargin > 1 && ~isempty(varargin{1})
     Event(['Updating parameter set with values from "', varargin{1}, '"']);
     params = varargin{1};
 else
     params = cell2table(get(handles.model_table, 'Data'), 'VariableNames', ...
         get(handles.model_table, 'ColumnName'));
+end
+
+% Get gender
+if nargin > 2
+    gender = varargin{2};
+else
+    gender = 'Male';
 end
 
 % If the user has provided DICOM data
@@ -52,21 +60,34 @@ if ~isempty(handles.image) && isfield(handles.image, 'structures') && ...
     % Scale dose according to MU
     dose = handles.dose;
     mu = str2double(get(handles.mu_input, 'String'));
-    if isfield(handles.plan, 'mu') && ~isnan(mu) && mu ~= handles.plan.mu
-        Event(sprintf('Scaling plan dose by MU difference: %i/%i', mu, ...
+    if isfield(handles.plan, 'mu') && ~isnan(mu) && ...
+            abs(mu - handles.plan.mu) > 1
+        Event(sprintf('Scaling plan dose by MU difference: %f/%f', mu, ...
             handles.plan.mu));
         dose.data = dose.data * mu / handles.plan.mu;
     end
     
     % Update risk model
     risk = ApplyRiskModel(get(handles.model_menu, 'Value'), ...
-        params, handles.image.structures, dose, ...
+        params, gender, handles.image.structures, dose, ...
         str2double(get(handles.dvh_fx, 'String')), age_params, ...
         leakage_params);
 
+    % Associate structures
+    structures = cell(size(risk, 1), 1);
+    for i = 1:size(risk, 1)
+        if any(isletter(risk.DICOM{i}))
+            for j = 1:length(handles.image.structures)
+                if strcmp(handles.image.structures{j}.name, risk.DICOM{i})
+                    structures{i} = handles.image.structures{j};
+                end
+            end
+        end
+    end
+    
     % Update plot
     handles.dvh_axes = PlotDVH(handles.dvh_axes, get(handles.dvh_menu, ...
-        'Value'), handles.image.structures, dose, risk.Plot);
+        'Value'), structures, dose, risk.Plot);
     
     % Clear temporary variables
     clear mu dose;
@@ -74,7 +95,7 @@ else
     
     % Update risk model
     risk = ApplyRiskModel(get(handles.model_menu, 'Value'), ...
-        params, [], [], str2double(get(handles.dvh_fx, 'String')), ...
+        params, gender, [], [], str2double(get(handles.dvh_fx, 'String')), ...
         age_params, leakage_params);
 
     % Update plot
@@ -82,10 +103,13 @@ else
         'Value'), [], [], risk.Plot);
 end
 
-% Update risk column
+% Update parameters table
 risk.Plot = [];
 set(handles.model_table, 'ColumnName', risk.Properties.VariableNames);
 set(handles.model_table, 'ColumnEditable', ...
     [false true(1, size(risk,2)-2) false]);
 set(handles.model_table, 'Data', table2cell(risk));
+
+% Update summary
+handles.risk_axes = PlotBarRisk(handles.risk_axes, risk);
 

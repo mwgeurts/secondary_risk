@@ -29,15 +29,32 @@ function axis = PlotDVH(axis, i, varargin)
 % Define persistent variables
 persistent structures dose dvh risk;
 
+% Define number of DVH bins
+bins = 100;
+
 % If new inputs are provided, store them
 if nargin > 2
     structures = varargin{1};
     dose = varargin{2};
     risk = varargin{3};
     
-    % Recompute the DVH
-    if ~isempty(structures) &&  ~isempty(dose)
-        % error('TODO');
+    % Recompute the differential DVH
+    if ~isempty(structures) &&  ~isempty(dose) && ~isempty(risk)
+        
+        % Initialize DVH array
+        dvh = zeros(length(structures)+1, bins + 1);
+        
+        % Compute dose bins
+        dvh(1,:) = (0:bins)/bins * ceil(max(max(max(dose.data))));
+        
+        % Loop through structures, computing differential DVH
+        for j = 1:length(structures)
+            if ~isempty(structures{j})
+                dvh(j+1,1:bins) = ...
+                    histcounts(dose.data(structures{j}.mask), dvh(1,:));
+                dvh(j+1,:) = dvh(j+1,:) / sum(dvh(j+1,:));
+            end
+        end
     else
         dvh = [];
     end
@@ -54,30 +71,32 @@ if ~isempty(risk) && i > 0
     cla reset;
     
     % Plot the risk for the specified structure
-    if ~isempty(dvh)
+    if ~isempty(dvh) && sum(dvh(i+1,:)) > 0
         yyaxis left;
     end
     plot(risk{i}(1,:), risk{i}(2,:) * 1e4);
-    ylabel('EAR (per 10,000 persons)');
+    ylabel('Risk (per 10,000 persons)');
 
     % Turn on major gridlines and border
     box on;
     grid on;
     
     % If DVH data also exists
-    if ~isempty(dvh)
+    if ~isempty(dvh) && sum(dvh(i+1,:)) > 0
         yyaxis right;
-        error('TODO');
+        plot(dvh(1,:), dvh(i+1,:)*100);
+        ylabel('Relative Volume (%)');
     end
     
     % Set x limit to max dose or 30 Gy
     if ~isempty(dose)
-        xlim([0 max(max(max(dose.data)))]);
+        xlim([0 ceil(max(max(max(dose.data))))]);
     else
-        xlim([0 30]);
+        xlim([0 max(risk{i}(1,:))]);
     end
     xlabel('Dose (Gy)');
     
+    % Enable plot
     set(allchild(axis), 'visible', 'on'); 
     set(axis, 'visible', 'on');
     

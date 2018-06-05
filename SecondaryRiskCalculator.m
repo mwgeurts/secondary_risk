@@ -22,7 +22,7 @@ function varargout = SecondaryRiskCalculator(varargin)
 
 % Edit the above text to modify the response to help SecondaryRiskCalculator
 
-% Last Modified by GUIDE v2.5 04-Jun-2018 16:02:24
+% Last Modified by GUIDE v2.5 05-Jun-2018 09:01:19
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -43,7 +43,6 @@ else
 end
 % End initialization code - DO NOT EDIT
 
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function SecondaryRiskCalculator_OpeningFcn(hObject, ~, handles, varargin)
 % This function has no output args, see OutputFcn.
@@ -59,13 +58,13 @@ handles.output = hObject;
 guidata(hObject, handles);
 
 % Turn off MATLAB warnings
-warning('off','all');
+warning('off', 'all');
 
 % Choose default command line output for WaterTankAnalysis
 handles.output = hObject;
 
 % Set version handle
-handles.version = '0.1.0';
+handles.version = '1.0.0';
 set(handles.version_text, 'String', ['Version ', handles.version]);
 
 % Determine path of current application
@@ -238,9 +237,9 @@ function alpha_CreateFcn(hObject, ~, ~)
 % handles    empty - handles not created until after all CreateFcns called
 
 % Edit controls usually have a white background on Windows.
-if ispc && isequal(get(hObject,'BackgroundColor'), ...
-        get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
+if ispc && isequal(get(hObject, 'BackgroundColor'), ...
+        get(0, 'defaultUicontrolBackgroundColor'))
+    set(hObject, 'BackgroundColor', 'white');
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -262,9 +261,9 @@ function tcs_slider_CreateFcn(hObject, ~, ~)
 % handles    empty - handles not created until after all CreateFcns called
 
 % Slider controls usually have a light gray background.
-if isequal(get(hObject,'BackgroundColor'), ...
-        get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor',[.9 .9 .9]);
+if isequal(get(hObject, 'BackgroundColor'), ...
+        get(0, 'defaultUicontrolBackgroundColor'))
+    set(hObject, 'BackgroundColor',[.9 .9 .9]);
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -280,9 +279,9 @@ function path_text_CreateFcn(hObject, ~, ~)
 % handles    empty - handles not created until after all CreateFcns called
 
 % Edit controls usually have a white background on Windows.
-if ispc && isequal(get(hObject,'BackgroundColor'), ...
-        get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
+if ispc && isequal(get(hObject, 'BackgroundColor'), ...
+        get(0, 'defaultUicontrolBackgroundColor'))
+    set(hObject, 'BackgroundColor', 'white');
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -304,8 +303,8 @@ function model_menu_Callback(hObject, ~, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 % Log change
-models = cellstr(get(hObject,'String'));
-Event(['Model changed to ', models{get(hObject,'Value')}]);
+models = cellstr(get(hObject, 'String'));
+Event(['Model changed to ', models{get(hObject, 'Value')}]);
 
 % Recalculate the risk model
 handles = UpdateRiskModel(handles);
@@ -320,9 +319,9 @@ function model_menu_CreateFcn(hObject, ~, ~)
 % handles    empty - handles not created until after all CreateFcns called
 
 % Ppopupmenu controls usually have a white background on Windows.
-if ispc && isequal(get(hObject,'BackgroundColor'), ...
-        get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
+if ispc && isequal(get(hObject, 'BackgroundColor'), ...
+        get(0, 'defaultUicontrolBackgroundColor'))
+    set(hObject, 'BackgroundColor', 'white');
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -332,12 +331,17 @@ function param_menu_Callback(hObject, ~, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 % Log change
-params = cellstr(get(hObject,'String'));
-Event(['Parameter set changed to ', params{get(hObject,'Value')}]);
+params = cellstr(get(hObject, 'String'));
+Event(['Parameter set changed to ', params{get(hObject, 'Value')}]);
 
 % Recalculate the risk model
+genders = cellstr(get(handles.gender_menu, 'String'));
 handles = UpdateRiskModel(handles, ...
-    handles.parameters{get(hObject,'Value'),2});
+    handles.parameters{get(hObject, 'Value'),2}, ...
+    genders{get(handles.gender_menu, 'Value')});
+
+% Clear temporary variables
+clear params genders;
 
 % Update handles structure
 guidata(hObject, handles);
@@ -349,9 +353,42 @@ function param_menu_CreateFcn(hObject, ~, ~)
 % handles    empty - handles not created until after all CreateFcns called
 
 % Popupmenu controls usually have a white background on Windows.
-if ispc && isequal(get(hObject,'BackgroundColor'), ...
-        get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
+if ispc && isequal(get(hObject, 'BackgroundColor'), ...
+        get(0, 'defaultUicontrolBackgroundColor'))
+    set(hObject, 'BackgroundColor', 'white');
+end
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function gender_menu_Callback(hObject, ~, handles)
+% hObject    handle to gender_menu (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Log change
+genders = cellstr(get(hObject, 'String'));
+Event(['Gender changed to ', genders{get(hObject, 'Value')}]);
+
+% Recalculate the risk model
+handles = UpdateRiskModel(handles, ...
+    handles.parameters{get(handles.param_menu, 'Value'),2}, ...
+    genders{get(hObject, 'Value')});
+
+% Clear temporary variables
+clear genders;
+
+% Update handles structure
+guidata(hObject, handles);
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function gender_menu_CreateFcn(hObject, ~, ~)
+% hObject    handle to gender_menu (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Popupmenu controls usually have a white background on Windows.
+if ispc && isequal(get(hObject, 'BackgroundColor'), ...
+        get(0, 'defaultUicontrolBackgroundColor'))
+    set(hObject, 'BackgroundColor', 'white');
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -361,11 +398,11 @@ function dvh_menu_Callback(hObject, ~, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 % Log choice
-contents = cellstr(get(hObject,'String'));
-Event(['DVH/risk plot changed to site ', contents{get(hObject,'Value')}]);
+contents = cellstr(get(hObject, 'String'));
+Event(['DVH/risk plot changed to site ', contents{get(hObject, 'Value')}]);
 
 % Update plot
-handles.dvh_axes = PlotDVH(handles.dvh_axes, get(hObject,'Value'));
+handles.dvh_axes = PlotDVH(handles.dvh_axes, get(hObject, 'Value'));
 
 % Update handles structure
 guidata(hObject, handles);
@@ -377,9 +414,9 @@ function dvh_menu_CreateFcn(hObject, ~, ~)
 % handles    empty - handles not created until after all CreateFcns called
 
 % Popupmenu controls usually have a white background on Windows.
-if ispc && isequal(get(hObject,'BackgroundColor'), ...
-        get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
+if ispc && isequal(get(hObject, 'BackgroundColor'), ...
+        get(0, 'defaultUicontrolBackgroundColor'))
+    set(hObject, 'BackgroundColor', 'white');
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -444,7 +481,8 @@ if get(hObject, 'Value')
     
     % Log action
     Event(['Leakage model enabled with parameters [', ...
-        get(handles.leakage_input, 'String'), ']']);
+        get(handles.leakage_input, 'String'), ', ', ...
+        get(handles.mu_input, 'String'), ']']);
     
     % Enable inputs
     set(handles.leakage_text, 'Enable', 'On');
@@ -465,10 +503,8 @@ else
     set(handles.mu_input, 'Enable', 'Off');
 end
 
-% Recalculate the risk model only if plan data is loaded
-if ~isempty(handles.plan)
-    handles = UpdateRiskModel(handles);
-end
+% Recalculate the risk model
+handles = UpdateRiskModel(handles);
 
 % Update handles structure
 guidata(hObject, handles);
@@ -496,9 +532,9 @@ function dvh_fx_CreateFcn(hObject, ~, ~)
 % handles    empty - handles not created until after all CreateFcns called
 
 % Edit controls usually have a white background on Windows.
-if ispc && isequal(get(hObject,'BackgroundColor'), ...
-        get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
+if ispc && isequal(get(hObject, 'BackgroundColor'), ...
+        get(0, 'defaultUicontrolBackgroundColor'))
+    set(hObject, 'BackgroundColor', 'white');
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -524,9 +560,9 @@ function agea_input_CreateFcn(hObject, ~, ~)
 % handles    empty - handles not created until after all CreateFcns called
 
 % Edit controls usually have a white background on Windows.
-if ispc && isequal(get(hObject,'BackgroundColor'), ...
-        get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
+if ispc && isequal(get(hObject, 'BackgroundColor'), ...
+        get(0, 'defaultUicontrolBackgroundColor'))
+    set(hObject, 'BackgroundColor', 'white');
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -553,9 +589,9 @@ function leakage_input_CreateFcn(hObject, ~, ~)
 % handles    empty - handles not created until after all CreateFcns called
 
 % Edit controls usually have a white background on Windows.
-if ispc && isequal(get(hObject,'BackgroundColor'), ...
-        get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
+if ispc && isequal(get(hObject, 'BackgroundColor'), ...
+        get(0, 'defaultUicontrolBackgroundColor'))
+    set(hObject, 'BackgroundColor', 'white');
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -581,9 +617,9 @@ function agee_input_CreateFcn(hObject, ~, ~)
 % handles    empty - handles not created until after all CreateFcns called
 
 % Edit controls usually have a white background on Windows.
-if ispc && isequal(get(hObject,'BackgroundColor'), ...
-        get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
+if ispc && isequal(get(hObject, 'BackgroundColor'), ...
+        get(0, 'defaultUicontrolBackgroundColor'))
+    set(hObject, 'BackgroundColor', 'white');
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -617,9 +653,9 @@ function mu_input_CreateFcn(hObject, ~, ~)
 % handles    empty - handles not created until after all CreateFcns called
 
 % Edit controls usually have a white background on Windows.
-if ispc && isequal(get(hObject,'BackgroundColor'), ...
-        get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
+if ispc && isequal(get(hObject, 'BackgroundColor'), ...
+        get(0, 'defaultUicontrolBackgroundColor'))
+    set(hObject, 'BackgroundColor', 'white');
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -652,7 +688,7 @@ elseif eventdata.Indices(2) == 3
     end
 else
     Event([data{eventdata.Indices(1),1}, ' model parameter ', ...
-        columns{eventdata.Indices(2),1},' set to ', eventdata.EditData]);
+        columns{eventdata.Indices(2),1}, ' set to ', eventdata.EditData]);
 end
 
 % Recalculate the risk model
