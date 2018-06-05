@@ -1,0 +1,118 @@
+<deployment-project plugin="plugin.apptool" plugin-version="1.0">
+  <configuration build-checksum="2353093155" file="/Users/mwgeurts/Documents/Planning Systems/Biological Models/Secondary Incidence Project/secondary_risk/Secondary Malignancy Risk Calculator.prj" location="/Users/mwgeurts/Documents/Planning Systems/Biological Models/Secondary Incidence Project/secondary_risk" name="Secondary Malignancy Risk Calculator" target="target.mlapps" target-name="Package App">
+    <param.appname>Secondary Malignancy Risk Calculator</param.appname>
+    <param.authnamewatermark>Mark Geurts</param.authnamewatermark>
+    <param.email>mark.w.geurts@gmail.com</param.email>
+    <param.company>University of Wisconsin-Madison</param.company>
+    <param.icon />
+    <param.icons />
+    <param.summary>Computation of secondary malignancy risk following radiation therapy</param.summary>
+    <param.description>This tool uses the DICOM dataset (CT, RTSS, Dose, Plan) to compute the risk of secondary malignancy using various risk models and parameters.</param.description>
+    <param.screenshot />
+    <param.version>1.0.0</param.version>
+    <param.products.name />
+    <param.products.id />
+    <param.products.version />
+    <param.platforms />
+    <param.output>/Users/mwgeurts/Documents/Planning Systems/Biological Models/Secondary Incidence Project/secondary_risk</param.output>
+    <param.guid>6fc1b6db-747f-4cac-b5e1-2c01dd0c37fe</param.guid>
+    <unset>
+      <param.authnamewatermark />
+      <param.email />
+      <param.company />
+      <param.icon />
+      <param.icons />
+      <param.screenshot />
+      <param.products.name />
+      <param.products.id />
+      <param.products.version />
+      <param.platforms />
+      <param.output />
+    </unset>
+    <fileset.main>
+      <file>${PROJECT_ROOT}/SecondaryRiskCalculator.m</file>
+    </fileset.main>
+    <fileset.depfun>
+      <file>${MATLAB_ROOT}/toolbox/local/userpath.m</file>
+      <file>${PROJECT_ROOT}/Event.m</file>
+      <file>${PROJECT_ROOT}/SecondaryRiskCalculator.fig</file>
+      <file>${PROJECT_ROOT}/dicom_tools/LoadDICOMDose.m</file>
+      <file>${PROJECT_ROOT}/dicom_tools/LoadDICOMImages.m</file>
+      <file>${PROJECT_ROOT}/dicom_tools/LoadDICOMStructures.m</file>
+      <file>${PROJECT_ROOT}/dicom_tools/ScanDICOMPath.m</file>
+      <file>${PROJECT_ROOT}/log.txt</file>
+      <file>${PROJECT_ROOT}/private/AddSubModulePaths.m</file>
+      <file>${PROJECT_ROOT}/private/ApplyRiskModel.m</file>
+      <file>${PROJECT_ROOT}/private/BrowsePatient.m</file>
+      <file>${PROJECT_ROOT}/private/ClearAllData.m</file>
+      <file>${PROJECT_ROOT}/private/LoadVersionInfo.m</file>
+      <file>${PROJECT_ROOT}/private/ParseConfigOptions.m</file>
+      <file>${PROJECT_ROOT}/private/PlotBarRisk.m</file>
+      <file>${PROJECT_ROOT}/private/PlotDVH.m</file>
+      <file>${PROJECT_ROOT}/private/ScanParameterPath.m</file>
+      <file>${PROJECT_ROOT}/private/UpdateRiskModel.m</file>
+      <file>${PROJECT_ROOT}/private/strnearest.m</file>
+      <file>${PROJECT_ROOT}/tcs_plots/@ImageViewer/ImageViewer.m</file>
+      <file>${PROJECT_ROOT}/tcs_plots/@ImageViewer/Initialize.m</file>
+      <file>${PROJECT_ROOT}/tcs_plots/@ImageViewer/Update.m</file>
+    </fileset.depfun>
+    <fileset.resources>
+      <file>${PROJECT_ROOT}/parameters/Default_Parameters_(EAR).csv</file>
+    </fileset.resources>
+    <fileset.package />
+    <build-deliverables>
+      <file location="/Users/mwgeurts/Documents/Planning Systems/Biological Models/Secondary Incidence Project" name="secondary_risk" optional="false">/Users/mwgeurts/Documents/Planning Systems/Biological Models/Secondary Incidence Project/secondary_risk</file>
+    </build-deliverables>
+    <workflow />
+    <matlab>
+      <root>/Applications/MATLAB_R2017b.app</root>
+      <toolboxes>
+        <toolbox name="fixedpoint" />
+        <toolbox name="matlabcoder" />
+        <toolbox name="matlabhdlcoder" />
+        <toolbox name="embeddedcoder" />
+        <toolbox name="polyspacebugfinder" />
+      </toolboxes>
+      <toolbox>
+        <fixedpoint>
+          <enabled>true</enabled>
+        </fixedpoint>
+      </toolbox>
+      <toolbox>
+        <matlabcoder>
+          <enabled>true</enabled>
+        </matlabcoder>
+      </toolbox>
+      <toolbox>
+        <matlabhdlcoder>
+          <enabled>true</enabled>
+        </matlabhdlcoder>
+      </toolbox>
+      <toolbox>
+        <embeddedcoder>
+          <enabled>true</enabled>
+        </embeddedcoder>
+      </toolbox>
+      <toolbox>
+        <polyspacebugfinder>
+          <enabled>true</enabled>
+        </polyspacebugfinder>
+      </toolbox>
+    </matlab>
+    <platform>
+      <unix>true</unix>
+      <mac>true</mac>
+      <windows>false</windows>
+      <win2k>false</win2k>
+      <winxp>false</winxp>
+      <vista>false</vista>
+      <linux>false</linux>
+      <solaris>false</solaris>
+      <osver>10.13.5</osver>
+      <os32>false</os32>
+      <os64>true</os64>
+      <arch>maci64</arch>
+      <matlab>true</matlab>
+    </platform>
+  </configuration>
+</deployment-project>
