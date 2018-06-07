@@ -3,7 +3,8 @@ function axis = PlotDVH(axis, i, varargin)
 % SecondaryRiskCalculator. It is called with two different input
 % combinations:
 %
-% axis = PlotDVH(axis, i, structures, dose, risk);
+% axis = PlotDVH(axis, i, 'structures', structures, 'dose', dose, ...
+%                'risk', risk);
 % axis = PlotDVH(axis, i);
 %
 % The first input set will compute and plot the differential dose and risk
@@ -32,11 +33,19 @@ persistent structures dose dvh risk;
 % Define number of DVH bins
 bins = 100;
 
-% If new inputs are provided, store them
+% If new inputs are provided
 if nargin > 2
-    structures = varargin{1};
-    dose = varargin{2};
-    risk = varargin{3};
+    
+    % Store them
+    for i = 1:2:nargin-2
+        if strcmp(varargin{i}, 'structures')
+            structures = varargin{i+1};
+        elseif strcmp(varargin{i}, 'dose')
+            dose = varargin{i+1};
+        elseif strcmp(varargin{i}, 'risk')
+            risk = varargin{i+1};
+        end
+    end
     
     % Recompute the differential DVH
     if ~isempty(structures) &&  ~isempty(dose) && ~isempty(risk)

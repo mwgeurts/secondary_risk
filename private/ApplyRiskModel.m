@@ -3,23 +3,26 @@ function risk = ApplyRiskModel(varargin)
 % if new data is loaded in SecondaryRiskCalculator. When called with no
 % arguments, it returns a list of available models.
 %
-% Alternatively, this function is called with six inputs:
-%   varargin{1}: the index of the model to compute
-%   varargin{2}: a table array of sites, corresponding DICOM structures, 
+% Alternatively, this function can be called with one or more name/value
+% pairs. The 'model' and 'params' fields are required.
+%   model: the index of the model to compute
+%   params: a table of sites, corresponding DICOM structures, 
 %       logicals indicating whether to compute each structure, and model
-%       parameters. Alternatively, varargin{2} can be a string containing 
+%       parameters. Alternatively, this can be a string containing 
 %       the file name of a parameter file to load.
-%   varargin{3}: a string indicating gender ('M' or 'F'). Only applied if a
-%       GenderRatio field exists in the parameters.
-%   varargin{4}: a cell array of structures. See LoadDICOMStructures for
-%       information on the format expected.
-%   varargin{5}: a dose structure. See LoadDICOMDose for information on the
-%       format expected.
-%   varargin{6}: an optional number of fractions used to consider 
-%   varargin{7}: a vector of patient age at exposure and risk evaluation, 
-%       or empty if age is ignored
-%   varargin{8}: a vector of leakage parameters (leakage fraction, MU), or 
-%       empty of structures outside of the CT are to be ignored
+%   gender: optional string indicating gender ('M' or 'F'). Only 
+%       applied if a GenderRatio field exists in the parameters.
+%   structures: optional cell array of structures. See LoadDICOMStructures 
+%       for information on the format expected.
+%   dose: optional dose structure. See LoadDICOMDose for information 
+%       on the format expected. Both structures and dose are required to
+%       compute DVH based risk.
+%   fx: optional number of fractions used to consider. If not
+%       provided, will assume 1 fraction.
+%   age: optional vector of patient age at exposure and risk 
+%       evaluation, ignored if not provided or parameters are empty.
+%   leakage: optional vector of leakage parameters (leakage fraction, 
+%       MU), ignored if not provided or parameters are empty.
 %
 % Author: Mark Geurts, mark.w.geurts@gmail.com
 % Copyright (C) 2018 University of Wisconsin Board of Regents
@@ -55,17 +58,28 @@ end
 % Define the number of bins
 bins = 200;
 
+% Load structure from varargin
+inputs = struct;
+for i = 1:2:nargin
+    inputs.(varargin{i}) = varargin{i+1};
+end
+
+% Validate required inputs were provided
+if ~isfield(inputs, 'model') || ~isfield(inputs, 'params')
+    Event('The model and params input arguments are required', 'ERROR');
+end
+
 % Execute code block based on format provided in varargin{1}
-switch varargin{1}
+switch inputs.model
 
     % UNSCEAR fractionated
     case 1
         
         % If a table array was not provided, create one
-        if ~istable(varargin{2})
+        if ~istable(inputs.params)
             
             % Load default model parameters
-            params = readtable(varargin{2});
+            params = readtable(inputs.params);
             risk = table(params{:,1}, cell(size(params,1),1), ...
                 true(size(params,1), 1), params.Alpha1, params.Beta1, ...
                 params.Alpha2, params.Beta2, ...
@@ -73,7 +87,7 @@ switch varargin{1}
                 'Alpha1', 'Beta1', 'Alpha2', 'Beta2'});
             
             % If a gender flag was provided
-            if nargin > 2 && ~isempty(varargin{3}) && ...
+            if isfield(inputs, 'gender') && ~isempty(inputs.gender) && ...
                     ismember('GenderRatio', params.Properties.VariableNames)
                 
                 % Update Alpha1 (GenderRatio is Female/Male)
@@ -81,18 +95,18 @@ switch varargin{1}
                     
                     % A GenderRatio of Inf means there is no male risk
                     if params.GenderRatio(i) == Inf && ...
-                            startsWith(varargin{3}, 'M')
+                            startsWith(inputs.gender, 'M')
                         risk.Include(i) = false;
                         risk.Alpha1(i) = 0;
 
                     % A GenderRatio of 0 means there is no female risk
                     elseif params.GenderRatio(i) == 0  && ...
-                            startsWith(varargin{3}, 'F')
+                            startsWith(inputs.gender, 'F')
                         risk.Include(i) = false;
                         risk.Alpha1(i) = 0;
 
                     % Otherwise, scale the Male risk for Females
-                    elseif startsWith(varargin{3}, 'F') && ...
+                    elseif startsWith(inputs.gender, 'F') && ...
                             params.GenderRatio(i) ~= Inf
                         risk.Alpha1(i) = risk.Alpha1(i) * ...
                             params.GenderRatio(i);
@@ -110,17 +124,18 @@ switch varargin{1}
             % Append empty risk column
             risk.Risk = cell(size(params,1),1);
         
-        % Otherwise, use provided one
+        % Otherwise, use provided one, with cleared Risk
         else
-            risk = varargin{2};
+            risk = inputs.params;
+            risk.Risk = cell(size(risk,1),1);
         end
         
         % Append empty risk plot column
         risk.Plot = cell(size(risk,1),1);
         
         % If fractions were provided
-        if nargin > 5 && ~isempty(varargin{6})
-            n = varargin{6};
+        if isfield(inputs, 'fx') && ~isempty(inputs.fx)
+            n = inputs.fx;
         else
             n = 1;
         end
@@ -129,10 +144,10 @@ switch varargin{1}
         for i = 1:size(risk,1)
             
             % Compute risk plot using provided parameters
-            if isempty(varargin{5})
-                d = (0:bins)/bins * 30;
+            if isfield(inputs, 'dose') && ~isempty(inputs.dose)
+                d = (0:bins)/bins * ceil(max(max(max(inputs.dose.data))));
             else
-                d = (0:bins)/bins * ceil(max(max(max(varargin{5}.data))));
+                d = (0:bins)/bins * 30;
             end
             risk.Plot{i} = [d; (risk.Alpha1(i) * d + ...
                 risk.Beta1(i) * d.^2 / n) .* ...
@@ -144,27 +159,27 @@ switch varargin{1}
             
             % If site matches to a DICOM structure, compute DVH risk
             elseif any(isletter(risk.DICOM{i})) && nargin > 3 && ...
-                    ~isempty(varargin{4}) && ~isempty(varargin{5})
+                    ~isempty(inputs.structures) && ~isempty(inputs.dose)
                 
                 % Loop through structures and find match
-                for j = 1:length(varargin{4})
-                    if strcmp(varargin{4}{j}.name, risk.DICOM{i})
+                for j = 1:length(inputs.structures)
+                    if strcmp(inputs.structures{j}.name, risk.DICOM{i})
                         
                         % Compute differential risk
                         risk.Risk{i} = sum(interp1(risk.Plot{i}(1,:), ...
-                            risk.Plot{i}(2,:), varargin{5}.data(...
-                            varargin{4}{j}.mask), 'linear')) / ...
-                            sum(sum(sum(varargin{4}{j}.mask))) * 1e4;
+                            risk.Plot{i}(2,:), inputs.dose.data(...
+                            inputs.structures{j}.mask), 'linear')) / ...
+                            sum(sum(sum(inputs.structures{j}.mask))) * 1e4;
                     end
                 end
                 
             % Otherwise, if parameters are provided, compute leakage risk
-            elseif nargin > 7 && ~isempty(varargin{8})
+            elseif isfield(inputs, 'leakage') && ~isempty(inputs.leakage)
                 
                 % Assume site is uniformly irradiated by leakage
                 risk.Risk{i} = interp1(risk.Plot{i}(1,:), ...
-                    risk.Plot{i}(2,:), varargin{8}(1) * varargin{8}(2), ...
-                    'linear', 0) * 1e4;
+                    risk.Plot{i}(2,:), inputs.leakage(1) * ...
+                    inputs.leakage(2) * n * 0.01, 'linear', 0) * 1e4;
             
             % Otherwise, do not compute risk
             else
@@ -173,15 +188,15 @@ switch varargin{1}
         end
 end
 
-% If age paraemeters were provided
-if nargin > 6 && ~isempty(varargin{7})
+% If age parameters were provided
+if isfield(inputs, 'age') && ~isempty(inputs.age)
     
     % Apply age risk for each site
     for i = 1:size(risk,1)
         
         % Compute risk
-        mu = exp(risk.GammaE(i) * (varargin{7}(1) - 30) / 10 + ...
-            risk.GammaA(i) * log(varargin{7}(2)/70));
+        mu = exp(risk.GammaE(i) * (inputs.age(1) - 30) / 10 + ...
+            risk.GammaA(i) * log(inputs.age(2)/70));
         
         % Scale risk plot
         risk.Plot{i}(2,:) = risk.Plot{i}(2,:) * mu;

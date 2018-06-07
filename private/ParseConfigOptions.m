@@ -85,3 +85,7 @@ Event(sprintf('Default fractions set to %i', config.DEFAULT_FRACTIONS));
 config.MATCH_THRESHOLD = str2double(config.MATCH_THRESHOLD);
 Event(sprintf('Levenshtein match threshold set to %0.1f', ...
     config.MATCH_THRESHOLD));
+
+% Parse uncertainty numerical options
+config.CONF_INTERVAL = str2double(config.CONF_INTERVAL);
+config.NUM_SIMULATIONS = str2double(config.NUM_SIMULATIONS);

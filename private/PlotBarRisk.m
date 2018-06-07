@@ -1,8 +1,7 @@
-function axis = PlotBarRisk(axis, varargin)
+function axis = PlotBarRisk(axis, risk)
 % PlotBarRisk generates a horizontal bar risk plot for
 % SecondaryRiskCalculator. It requires two inputs, the axis to plot on and
-% a risk table (see ApplyRiskModel for details on the table format). The
-% risk can be persistently stored.
+% a risk table (see ApplyRiskModel for details on the table format).
 %
 % Author: Mark Geurts, mark.w.geurts@gmail.com
 % Copyright (C) 2018 University of Wisconsin Board of Regents
@@ -19,14 +18,6 @@ function axis = PlotBarRisk(axis, varargin)
 % 
 % You should have received a copy of the GNU General Public License along 
 % with this program. If not, see http://www.gnu.org/licenses/.
-
-% Define persistent variables
-persistent risk;
-
-% If new inputs are provided, store them
-if nargin > 1
-    risk = varargin{1};
-end
 
 % If risk data exists
 if ~isempty(risk) && any(~cellfun(@isempty, risk.Risk))

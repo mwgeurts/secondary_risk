@@ -628,7 +628,53 @@ function sim_button_Callback(hObject, ~, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
+% Retrieve parameter values
+params = cell2table(get(handles.model_table, 'Data'), 'VariableNames', ...
+        get(handles.model_table, 'ColumnName'));
 
+% Retrieve age parameters
+if get(handles.age_check, 'Value') == 1
+    age_params = [str2double(get(handles.agee_input, 'String')) ...
+        str2double(get(handles.agea_input, 'String'))];
+else
+    age_params = [];
+end
+
+% Retrieve leakage parameters
+if get(handles.leakage_check, 'Value') == 1 && ...
+        ~isempty(get(handles.mu_input, 'String'))
+    leakage_params = [str2double(strrep(get(handles.leakage_input, ...
+        'String'), '%', ''))/100
+        str2double(get(handles.mu_input, 'String'))];
+else
+    leakage_params = [];
+end
+    
+% Scale dose according to MU
+dose = handles.dose;
+mu = str2double(get(handles.mu_input, 'String'));
+if isfield(handles.plan, 'mu') && ~isnan(mu) && ...
+        abs(mu - handles.plan.mu) > 1
+    Event(sprintf('Scaling plan dose by MU difference: %f/%f', mu, ...
+        handles.plan.mu));
+    dose.data = dose.data * mu / handles.plan.mu;
+end
+
+% Execute SimulateUncertainty()
+ci = SimulateUncertainty('model', get(handles.model_menu, 'Value'), ...
+        'params', params, 'structures', handles.image.structures, ...
+        'dose', dose, 'fx', str2double(get(handles.dvh_fx, 'String')), ...
+        'age', age_params, 'leakage', leakage_params, ...
+        'config', handles.config);
+
+% Append confidence interval to model table
+warning('TODO');
+
+% Update bar plot with uncertainty bars
+warning('TODO');
+
+% Update handles structure
+guidata(hObject, handles);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function mu_input_Callback(hObject, ~, handles)

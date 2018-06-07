@@ -4,7 +4,7 @@
 DEFAULT_PATH        =   userpath
 
 % DEFAULT_ALPHA is the initial transparency to use for isodose display, as
-% a fraction
+% a fraction (0.4 = 40% transparency)
 DEFAULT_ALPHA       =   0.4
 
 % PARAM_PATH defines the folder containing the parameters. Can also be set
@@ -37,3 +37,11 @@ DEFAULT_FRACTIONS   =   10
 % MATCH_THRESHOLD sets the Levenshtein distance threshold (expressed as a 
 % fraction of the string length) above which the closest match is rejected
 MATCH_THRESHOLD     =   0.4
+
+% CONF_INTERVAL, NUM_SIMULATIONS, and UNCERTAINTY_TYPE are values used 
+% during uncertainty simulation and represent the confidence interval as a 
+% fraction, the number of random permutations to simulate, and the default 
+% type of parameter uncertainty.
+CONF_INTERVAL       =   0.95
+NUM_SIMULATIONS     =   1000000
+UNCERTAINTY_TYPE    =   Normal

@@ -3,6 +3,10 @@ function handles = UpdateRiskModel(handles, varargin)
 % SecondaryRiskCalculator and will update the the risk calculation and
 % associated GUI components. It should not be called outside of the GUI.
 %
+% Two optional name/value pairs can be provided via varargin:
+%   'params': a string containing the path to a parameter set.
+%   'gender': a string containing the patient's gender.
+%
 % Author: Mark Geurts, mark.w.geurts@gmail.com
 % Copyright (C) 2018 University of Wisconsin Board of Regents
 %
@@ -18,6 +22,12 @@ function handles = UpdateRiskModel(handles, varargin)
 % 
 % You should have received a copy of the GNU General Public License along 
 % with this program. If not, see http://www.gnu.org/licenses/.
+
+% Load structure from varargin
+inputs = struct;
+for i = 1:2:nargin-1
+    inputs.(varargin{i}) = varargin{i+1};
+end
 
 % Retrieve age parameters
 if get(handles.age_check, 'Value') == 1
@@ -38,17 +48,17 @@ else
 end
 
 % Create parameters table
-if nargin > 1 && ~isempty(varargin{1})
-    Event(['Updating parameter set with values from "', varargin{1}, '"']);
-    params = varargin{1};
+if isfield(inputs, 'params') && ~isempty(inputs.params)
+    Event(['Updating parameter set with values from "', inputs.params, '"']);
+    params = inputs.params;
 else
     params = cell2table(get(handles.model_table, 'Data'), 'VariableNames', ...
         get(handles.model_table, 'ColumnName'));
 end
 
 % Get gender
-if nargin > 2
-    gender = varargin{2};
+if isfield(inputs, 'gender') && ~isempty(inputs.gender)
+    gender = inputs.gender;
 else
     gender = 'Male';
 end
@@ -68,10 +78,11 @@ if ~isempty(handles.image) && isfield(handles.image, 'structures') && ...
     end
     
     % Update risk model
-    risk = ApplyRiskModel(get(handles.model_menu, 'Value'), ...
-        params, gender, handles.image.structures, dose, ...
-        str2double(get(handles.dvh_fx, 'String')), age_params, ...
-        leakage_params);
+    risk = ApplyRiskModel('model', get(handles.model_menu, 'Value'), ...
+        'params', params, 'gender', gender, 'structures', ...
+        handles.image.structures, 'dose', dose, 'fx', ...
+        str2double(get(handles.dvh_fx, 'String')), 'age', age_params, ...
+        'leakage', leakage_params);
 
     % Associate structures
     structures = cell(size(risk, 1), 1);
@@ -87,20 +98,22 @@ if ~isempty(handles.image) && isfield(handles.image, 'structures') && ...
     
     % Update plot
     handles.dvh_axes = PlotDVH(handles.dvh_axes, get(handles.dvh_menu, ...
-        'Value'), structures, dose, risk.Plot);
+        'Value'), 'structures', structures, 'dose', dose, 'risk', ...
+        risk.Plot);
     
     % Clear temporary variables
     clear mu dose;
 else
     
     % Update risk model
-    risk = ApplyRiskModel(get(handles.model_menu, 'Value'), ...
-        params, gender, [], [], str2double(get(handles.dvh_fx, 'String')), ...
-        age_params, leakage_params);
+    risk = ApplyRiskModel('model', get(handles.model_menu, 'Value'), ...
+        'params', params, 'gender', gender, 'fx', ...
+        str2double(get(handles.dvh_fx, 'String')), ...
+        'age', age_params, 'leakage', leakage_params);
 
     % Update plot
     handles.dvh_axes = PlotDVH(handles.dvh_axes, get(handles.dvh_menu, ...
-        'Value'), [], [], risk.Plot);
+        'Value'), 'risk', risk.Plot);
 end
 
 % Update parameters table

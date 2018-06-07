@@ -291,5 +291,8 @@ if path ~= 0
     
     % Recalculate the risk model
     handles = UpdateRiskModel(handles);
+    
+    % Enable uncertainty simulation
+    set(handles.sim_button, 'Enable', 'on');
 end
 

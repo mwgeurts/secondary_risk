@@ -112,9 +112,9 @@ set(handles.gender_menu, 'String', {'Male', 'Female'});
 set(handles.gender_menu, 'Value', 1);
 
 % Initialize parameters table
-risk = ApplyRiskModel(get(handles.model_menu, 'Value'), ...
-    handles.parameters{get(handles.param_menu, 'Value'), 2}, 'M', [], [], ...
-    str2double(get(handles.dvh_fx, 'String')), age_params, []);
+risk = ApplyRiskModel('model', get(handles.model_menu, 'Value'), ...
+    'params', handles.parameters{get(handles.param_menu, 'Value'), 2}, ...
+    'fx', str2double(get(handles.dvh_fx, 'String')), 'age', age_params);
 
 % If Gamma params are missing, disable age model
 if ~isfield(risk, 'GammaE') || ~isfield(risk, 'GammaA')
@@ -124,7 +124,7 @@ end
 % Update DVH dropdown and plot
 set(handles.dvh_menu, 'String', risk.Site);
 set(handles.dvh_menu, 'Value', 1);
-handles.dvh_axes = PlotDVH(handles.dvh_axes, 1, [], [], risk.Plot);
+handles.dvh_axes = PlotDVH(handles.dvh_axes, 1, 'risk', risk.Plot);
 
 % Set parameters table (minus the Plot data)
 risk.Plot = [];
@@ -132,6 +132,9 @@ set(handles.model_table, 'ColumnName', risk.Properties.VariableNames);
 set(handles.model_table, 'ColumnEditable', ...
     [false true(1, size(risk,2)-2) false]);
 set(handles.model_table, 'Data', table2cell(risk));
+
+% Disable uncertainty simulation
+set(handles.sim_button, 'Enable', 'off');
 
 % Clear temporary variables
 clear risk;
