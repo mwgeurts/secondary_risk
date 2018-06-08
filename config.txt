@@ -38,10 +38,10 @@ DEFAULT_FRACTIONS   =   10
 % fraction of the string length) above which the closest match is rejected
 MATCH_THRESHOLD     =   0.4
 
-% CONF_INTERVAL, NUM_SIMULATIONS, and UNCERTAINTY_TYPE are values used 
-% during uncertainty simulation and represent the confidence interval as a 
-% fraction, the number of random permutations to simulate, and the default 
-% type of parameter uncertainty.
-CONF_INTERVAL       =   0.95
-NUM_SIMULATIONS     =   1000000
+% ALPHA, NUM_SIMULATIONS, and UNCERTAINTY_TYPE are values used during 
+% uncertainty simulation and represent the type I error risk as a fraction, 
+% the number of random permutations to simulate, and the default type of 
+% parameter uncertainty (See SimulateUncertainty for options).
+ALPHA               =   0.05
+NUM_SIMULATIONS     =   1000
 UNCERTAINTY_TYPE    =   Normal

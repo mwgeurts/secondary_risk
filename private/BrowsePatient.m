@@ -149,6 +149,9 @@ if path ~= 0
 
     end
 
+    % Store max dose
+    handles.dose.max = max(max(max(handles.dose.data)));
+    
     % Enable and retrieve T/C/S selector
     set(handles.tcs_t, 'visible', 'on');
     set(handles.tcs_c, 'visible', 'on');

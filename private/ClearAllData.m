@@ -56,6 +56,7 @@ end
 set(handles.leakage_check, 'Value', handles.config.INCLUDE_LEAKAGE);
 set(handles.leakage_input, 'String', sprintf('%0.2f%%', ...
     handles.config.DEFAULT_LEAKAGE * 100));
+set(handles.mu_input, 'String', '');
 if ~handles.config.INCLUDE_LEAKAGE
     set(handles.leakage_text, 'Enable', 'off');
     set(handles.leakage_input, 'Enable', 'off');

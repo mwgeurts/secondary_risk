@@ -1,4 +1,4 @@
-function ci = SimulateUncertainty(varargin)
+function [alpha, m, ci] = SimulateUncertainty(varargin)
 % SimulateUncertainty estimates the risk uncertainty given provided
 % parameter uncertainties, using a Monte Carlo approach to simulate variant
 % input parameters.
@@ -42,8 +42,10 @@ function ci = SimulateUncertainty(varargin)
 % You should have received a copy of the GNU General Public License along 
 % with this program. If not, see http://www.gnu.org/licenses/.
 
-% Load structure from varargin
-inputs = struct;
+%% Initialize data
+% Load structure from varargin, initializing optional values
+inputs = struct('structures', [], 'dose', [], 'fx', [], 'age', [], ...
+    'leakage', []);
 for i = 1:2:nargin
     inputs.(varargin{i}) = varargin{i+1};
 end
@@ -75,9 +77,9 @@ if ~isfield(inputs, 'uparams') || isempty(inputs.uparams) || ...
             'Normal')
         
         % Launch NormalUncertainty figure
-        [uparams, ci, n] = NormalUncertainty('names', names, 'sites', ...
-            inputs.params.Site, 'ci', ...
-            inputs.config.CONF_INTERVAL, 'n', ...
+        [uparams, alpha, n] = NormalUncertainty('names', names, 'sites', ...
+            inputs.params.Site, 'alpha', ...
+            inputs.config.ALPHA, 'n', ...
             inputs.config.NUM_SIMULATIONS);
         
         % Store results
@@ -91,27 +93,79 @@ if ~isfield(inputs, 'uparams') || isempty(inputs.uparams) || ...
     
 % Otherwise, use provided values    
 else
-    uparams = inptus.uparams;
-    beta = inputs.config.CONF_INTERVAL;
+    uparams = inputs.uparams;
+    alpha = 1 - inputs.config.ALPHA;
     n = inputs.config.NUM_SIMULATIONS;
     umodel = inputs.config.UNCERTAINTY_TYPE;
 end
 
-% Loop through simulations
-for i = 1:n
+% Initialize temporary params table
+params = inputs.params;
 
-    % Start with provided parameters
-    params = inputs.params;
+% Initialize risk array
+risk = zeros(size(uparams, 1), n);
+
+% Start waitbar
+if usejava('jvm') && feature('ShowFigureWindows')
+    progress = waitbar(0, 'Running uncertainty simulations');
+    c = 10;
+    t = tic;
+    bar = true;
+end
+
+%% Run simulations
+% Loop through simulations
+Event(sprintf('Starting %0.0e uncertainty simulations using %s model', n, ...
+    umodel));
+for i = 1:n
+    
+    % Update waitbar
+    if bar && i > c
+        c = i + n * 0.02;
+        r = (n-i) * toc(t) / i;
+        waitbar(i/n, progress, sprintf(['Running uncertainty simulations ', ...
+            '(%02.0f:%02.0f remaining)'], floor(mod(r, 3600) / 60), ...
+            mod(r, 60)));
+    end
     
     % Apply randomization
     switch umodel
         
         % Normal randomization
         case 'Normal'
-            
-           
-    end
-    
 
+            % Use randn to apply random normal variation
+            params{:,4:end-1} = max(0, inputs.params{:,4:end-1} + ...
+                uparams{:,2:end} .* randn(size(uparams,1), ...
+                size(uparams,2)-1));
+            
+            % Execute ApplyRiskModel
+            result = ApplyRiskModel('model', inputs.model, 'params', ...
+                params, 'structures', inputs.structures, 'dose', ...
+                inputs.dose, 'fx', inputs.fx, 'age', inputs.age, 'leakage', ...
+                inputs.leakage);
+            
+            % Append to risk array
+            risk(:,i) = cell2mat(result.Risk);
+    end
 end
 
+%% Finish up
+% Close waitbar
+close(progress);
+Event('Simulations completed');
+
+% Compute risk confidence interval by trimming alpha
+Event('Computing confidence intervals');
+m = median(risk, 2);
+sorted = sort(risk, 2);
+ci = horzcat(sorted(:, ceil(size(risk,2) * alpha/2)), ...
+    sorted(:, floor(end - size(risk,2) * alpha/2)));
+
+% Log completion
+Event(sprintf(['Uncertainty simulation completed successfully in ', ...
+    '%0.1f seconds'], toc(t)));
+
+% Clear temporary variables
+clear bar c i inputs n names params progress r resultrisk sorted umodel ...
+    uparams;

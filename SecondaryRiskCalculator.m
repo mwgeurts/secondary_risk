@@ -64,7 +64,7 @@ warning('off', 'all');
 handles.output = hObject;
 
 % Set version handle
-handles.version = '1.0.0';
+handles.version = '1.1.0';
 set(handles.version_text, 'String', ['Version ', handles.version]);
 
 % Determine path of current application
@@ -661,17 +661,26 @@ if isfield(handles.plan, 'mu') && ~isnan(mu) && ...
 end
 
 % Execute SimulateUncertainty()
-ci = SimulateUncertainty('model', get(handles.model_menu, 'Value'), ...
+[alpha, m, ci] = SimulateUncertainty('model', get(handles.model_menu, 'Value'), ...
         'params', params, 'structures', handles.image.structures, ...
         'dose', dose, 'fx', str2double(get(handles.dvh_fx, 'String')), ...
         'age', age_params, 'leakage', leakage_params, ...
         'config', handles.config);
 
-% Append confidence interval to model table
-warning('TODO');
+% Update risk with median and append confidence interval to model table
+Event('Appending %0.1f%% confidence intervals to table', 100 - alpha * 100);
+data = get(handles.model_table, 'Data');
+data = horzcat(data, cell(size(data,1),2));
+for i = 1:size(data,1)
+    data(i,end-2:end) = {m(i) ci(i,1) ci(i,2)};
+end
+set(handles.model_table, 'Data', data);
+set(handles.model_table, 'ColumnName', vertcat(get(handles.model_table, ...
+    'ColumnName'), {'LowerCI'; 'UpperCI'}));
 
 % Update bar plot with uncertainty bars
-warning('TODO');
+handles.risk_axes = PlotBarRisk(handles.risk_axes, cell2table(num2cell(data), ...
+    'VariableNames', get(handles.model_table, 'ColumnName')));
 
 % Update handles structure
 guidata(hObject, handles);

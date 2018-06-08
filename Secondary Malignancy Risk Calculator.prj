@@ -1,5 +1,5 @@
 <deployment-project plugin="plugin.apptool" plugin-version="1.0">
-  <configuration build-checksum="2353093155" file="/Users/mwgeurts/Documents/Planning Systems/Biological Models/Secondary Incidence Project/secondary_risk/Secondary Malignancy Risk Calculator.prj" location="/Users/mwgeurts/Documents/Planning Systems/Biological Models/Secondary Incidence Project/secondary_risk" name="Secondary Malignancy Risk Calculator" target="target.mlapps" target-name="Package App">
+  <configuration build-checksum="160062377" file="/Users/mwgeurts/Documents/Planning Systems/Biological Models/Secondary Incidence Project/secondary_risk/Secondary Malignancy Risk Calculator.prj" location="/Users/mwgeurts/Documents/Planning Systems/Biological Models/Secondary Incidence Project/secondary_risk" name="Secondary Malignancy Risk Calculator" target="target.mlapps" target-name="Package App">
     <param.appname>Secondary Malignancy Risk Calculator</param.appname>
     <param.authnamewatermark>Mark Geurts</param.authnamewatermark>
     <param.email>mark.w.geurts@gmail.com</param.email>
@@ -9,7 +9,7 @@
     <param.summary>Computation of secondary malignancy risk following radiation therapy</param.summary>
     <param.description>This tool uses the DICOM dataset (CT, RTSS, Dose, Plan) to compute the risk of secondary malignancy using various risk models and parameters.</param.description>
     <param.screenshot />
-    <param.version>1.0.0</param.version>
+    <param.version>1.1.0</param.version>
     <param.products.name />
     <param.products.id />
     <param.products.version />
@@ -35,12 +35,13 @@
     <fileset.depfun>
       <file>${MATLAB_ROOT}/toolbox/local/userpath.m</file>
       <file>${PROJECT_ROOT}/Event.m</file>
+      <file>${PROJECT_ROOT}/NormalUncertainty.fig</file>
+      <file>${PROJECT_ROOT}/NormalUncertainty.m</file>
       <file>${PROJECT_ROOT}/SecondaryRiskCalculator.fig</file>
       <file>${PROJECT_ROOT}/dicom_tools/LoadDICOMDose.m</file>
       <file>${PROJECT_ROOT}/dicom_tools/LoadDICOMImages.m</file>
       <file>${PROJECT_ROOT}/dicom_tools/LoadDICOMStructures.m</file>
       <file>${PROJECT_ROOT}/dicom_tools/ScanDICOMPath.m</file>
-      <file>${PROJECT_ROOT}/log.txt</file>
       <file>${PROJECT_ROOT}/private/AddSubModulePaths.m</file>
       <file>${PROJECT_ROOT}/private/ApplyRiskModel.m</file>
       <file>${PROJECT_ROOT}/private/BrowsePatient.m</file>
@@ -50,6 +51,7 @@
       <file>${PROJECT_ROOT}/private/PlotBarRisk.m</file>
       <file>${PROJECT_ROOT}/private/PlotDVH.m</file>
       <file>${PROJECT_ROOT}/private/ScanParameterPath.m</file>
+      <file>${PROJECT_ROOT}/private/SimulateUncertainty.m</file>
       <file>${PROJECT_ROOT}/private/UpdateRiskModel.m</file>
       <file>${PROJECT_ROOT}/private/strnearest.m</file>
       <file>${PROJECT_ROOT}/tcs_plots/@ImageViewer/ImageViewer.m</file>

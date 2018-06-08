@@ -71,8 +71,8 @@ else
 end
 
 % Initialize simulation parameters
-set(handles.ci_input, 'String', sprintf('%0.0f%%', inputs.ci * 100));
-set(handles.n_input, 'String', sprintf('%0.1e', inputs.n));
+set(handles.ci_input, 'String', sprintf('%0.0f%%', (1 - inputs.alpha) * 100));
+set(handles.n_input, 'String', sprintf('%0.0e', inputs.n));
 
 % Update handles structure
 guidata(hObject, handles);
@@ -116,7 +116,7 @@ function n_input_Callback(hObject, ~, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 % Parse value
-set(hObject, 'String', sprintf('%0.1e', str2double(get(hObject, 'String'))));
+set(hObject, 'String', sprintf('%0.0e', str2double(get(hObject, 'String'))));
 
 % Update handles structure
 guidata(hObject, handles);
@@ -168,7 +168,8 @@ function run_button_Callback(~, ~, handles)
 global return_vars;
 return_vars{1} = cell2table(get(handles.stdev_table, 'Data'), ...
     'VariableNames', get(handles.stdev_table, 'ColumnName'));
-return_vars{2} = str2double(strrep(get(handles.ci_input, 'String'), '%', ''))/100;
+return_vars{2} = 1 - str2double(strrep(get(handles.ci_input, ...
+    'String'), '%', ''))/100;
 return_vars{3} = str2double(get(handles.n_input, 'String'));
 
 % Close the figure

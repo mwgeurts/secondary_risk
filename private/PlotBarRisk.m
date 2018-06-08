@@ -33,6 +33,17 @@ if ~isempty(risk) && any(~cellfun(@isempty, risk.Risk))
     barh(categorical(risk.Site(~cellfun(@isempty, risk.Risk))), ...
         cell2mat(risk.Risk(~cellfun(@isempty, risk.Risk))));
     
+    % If confidence intervals exist
+    if ismember('LowerCI', risk.Properties.VariableNames) && ...
+            ismember('UpperCI', risk.Properties.VariableNames)
+        hold on;
+        errorbar(cell2mat(risk.Risk(~cellfun(@isempty, risk.Risk))), ...
+            categorical(risk.Site(~cellfun(@isempty, risk.Risk))), ...
+            zeros(1,length(risk.Risk)), zeros(1,length(risk.Risk)), ...
+            cell2mat(risk.LowerCI), cell2mat(risk.LowerCI), '.', 'Color', 'black');
+        hold off;
+    end
+    
     % Add X axis label
     xlabel('Risk (per 10,000 persons)'); 
     

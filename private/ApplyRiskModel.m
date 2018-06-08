@@ -140,15 +140,21 @@ switch inputs.model
             n = 1;
         end
         
+        % Compute dose bins
+        if isfield(inputs, 'dose') && ~isempty(inputs.dose)
+            if isfield(inputs.dose, 'max')
+                d = (0:bins)/bins * ceil(inputs.dose.max);
+            else
+                d = (0:bins)/bins * ceil(max(max(max(inputs.dose.data))));
+            end
+        else
+            d = (0:bins)/bins * 30;
+        end
+        
         % Calculate risk for each matched site with include flag
         for i = 1:size(risk,1)
             
             % Compute risk plot using provided parameters
-            if isfield(inputs, 'dose') && ~isempty(inputs.dose)
-                d = (0:bins)/bins * ceil(max(max(max(inputs.dose.data))));
-            else
-                d = (0:bins)/bins * 30;
-            end
             risk.Plot{i} = [d; (risk.Alpha1(i) * d + ...
                 risk.Beta1(i) * d.^2 / n) .* ...
                 exp(-risk.Alpha2(i) * d - risk.Beta2(i) * d.^2 / n)];
@@ -168,8 +174,9 @@ switch inputs.model
                         % Compute differential risk
                         risk.Risk{i} = sum(interp1(risk.Plot{i}(1,:), ...
                             risk.Plot{i}(2,:), inputs.dose.data(...
-                            inputs.structures{j}.mask), 'linear')) / ...
-                            sum(sum(sum(inputs.structures{j}.mask))) * 1e4;
+                            inputs.structures{j}.mask), 'linear')) * ...
+                            prod(inputs.structures{j}.width) / ...
+                            (inputs.structures{j}.volume) * 1e4;
                     end
                 end
                 

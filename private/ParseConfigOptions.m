@@ -87,5 +87,5 @@ Event(sprintf('Levenshtein match threshold set to %0.1f', ...
     config.MATCH_THRESHOLD));
 
 % Parse uncertainty numerical options
-config.CONF_INTERVAL = str2double(config.CONF_INTERVAL);
+config.ALPHA = str2double(config.ALPHA);
 config.NUM_SIMULATIONS = str2double(config.NUM_SIMULATIONS);
