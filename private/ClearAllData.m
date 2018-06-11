@@ -115,7 +115,8 @@ set(handles.gender_menu, 'Value', 1);
 % Initialize parameters table
 risk = ApplyRiskModel('model', get(handles.model_menu, 'Value'), ...
     'params', handles.parameters{get(handles.param_menu, 'Value'), 2}, ...
-    'fx', str2double(get(handles.dvh_fx, 'String')), 'age', age_params);
+    'fx', str2double(get(handles.dvh_fx, 'String')), 'age', age_params, ...
+    'gender', 'M');
 
 % If Gamma params are missing, disable age model
 if ~isfield(risk, 'GammaE') || ~isfield(risk, 'GammaA')

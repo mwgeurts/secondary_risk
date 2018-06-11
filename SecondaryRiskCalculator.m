@@ -64,7 +64,7 @@ warning('off', 'all');
 handles.output = hObject;
 
 % Set version handle
-handles.version = '1.1.0';
+handles.version = '1.1.1';
 set(handles.version_text, 'String', ['Version ', handles.version]);
 
 % Determine path of current application
@@ -369,8 +369,8 @@ genders = cellstr(get(hObject, 'String'));
 Event(['Gender changed to ', genders{get(hObject, 'Value')}]);
 
 % Recalculate the risk model
-handles = UpdateRiskModel(handles, ...
-    handles.parameters{get(handles.param_menu, 'Value'),2}, ...
+handles = UpdateRiskModel(handles, 'params', ...
+    handles.parameters{get(handles.param_menu, 'Value'),2}, 'gender', ...
     genders{get(hObject, 'Value')});
 
 % Clear temporary variables

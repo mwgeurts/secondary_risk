@@ -37,13 +37,13 @@ bins = 100;
 if nargin > 2
     
     % Store them
-    for i = 1:2:nargin-2
-        if strcmp(varargin{i}, 'structures')
-            structures = varargin{i+1};
-        elseif strcmp(varargin{i}, 'dose')
-            dose = varargin{i+1};
-        elseif strcmp(varargin{i}, 'risk')
-            risk = varargin{i+1};
+    for j = 1:2:nargin-2
+        if strcmp(varargin{j}, 'structures')
+            structures = varargin{j+1};
+        elseif strcmp(varargin{j}, 'dose')
+            dose = varargin{j+1};
+        elseif strcmp(varargin{j}, 'risk')
+            risk = varargin{j+1};
         end
     end
     
